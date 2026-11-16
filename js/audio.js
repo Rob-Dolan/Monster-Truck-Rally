@@ -3,6 +3,7 @@
 let ctx = null, master = null, noiseBuf = null;
 let engine = null;
 let muted = false;
+let kicked = false;
 try { muted = localStorage.getItem('mr-muted') === '1'; } catch (e) { /* private mode */ }
 
 function ensure() {
@@ -61,9 +62,35 @@ function tone(type, f0, f1, dur, vol, delay = 0) {
 
 export const audio = {
   get muted() { return muted; },
+  // Call from inside a tap / click / key press. Safe to call many times.
   unlock() {
+    // iPad/iPhone: treat the game as "playback" audio so the silent-mode
+    // setting does not mute it (Safari 16.4+).
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* not supported */ }
     if (!ensure()) return;
-    if (ctx.state !== 'running') ctx.resume();
+    if (document.hidden) return;
+    if (ctx.state !== 'running') {
+      const p = ctx.resume();
+      if (p && p.catch) p.catch(() => {});
+    }
+    if (!kicked) {
+      // older iOS only starts the audio clock once a sound is played inside a tap
+      kicked = true;
+      const src = ctx.createBufferSource();
+      src.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      src.connect(ctx.destination);
+      src.start(0);
+    }
+  },
+  // Stop all sound while the game is hidden (other tab, minimised, app switched away).
+  pause() {
+    if (ctx && ctx.state === 'running') ctx.suspend();
+  },
+  resume() {
+    if (ctx && ctx.state !== 'running' && !document.hidden) {
+      const p = ctx.resume();
+      if (p && p.catch) p.catch(() => {});
+    }
   },
   setMuted(m) {
     muted = m;

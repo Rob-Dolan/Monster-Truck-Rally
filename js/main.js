@@ -212,7 +212,16 @@ ui.setMuted(audio.muted);
 ui.setSelected(-1);
 input.onFirstGesture = () => audio.unlock();
 initInput(document.getElementById('hud'));
-window.addEventListener('pointerdown', () => audio.unlock());
+// iPad Safari only lets sound start from inside a real tap, and which event
+// counts has changed between versions, so listen to all of them.
+for (const type of ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown']) {
+  window.addEventListener(type, () => audio.unlock(), { capture: true, passive: true });
+}
+// Silence everything when the game is not on screen, so the engine never
+// keeps rumbling in a background tab or a minimised window.
+document.addEventListener('visibilitychange', () => (document.hidden ? audio.pause() : audio.resume()));
+window.addEventListener('pagehide', () => audio.pause());
+window.addEventListener('pageshow', () => audio.resume());
 
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 200));

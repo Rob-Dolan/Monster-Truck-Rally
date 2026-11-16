@@ -2,7 +2,7 @@
 // Online it always fetches the newest files (and refreshes the saved copy);
 // offline it falls back to the saved copy.
 // If you add new files to the game, add them to FILES and bump VERSION.
-const VERSION = 'monster-rally-v3';
+const VERSION = 'monster-rally-v4';
 const FILES = [
   './',
   './index.html',
