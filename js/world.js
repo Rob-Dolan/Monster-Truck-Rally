@@ -80,7 +80,8 @@ function carGeos() {
   if (!carGeo) {
     carGeo = {
       box: new THREE.BoxGeometry(1, 1, 1),
-      wheel: new THREE.CylinderGeometry(0.38, 0.38, 0.3, 8).rotateZ(Math.PI / 2),
+      // one cylinder per axle (both wheels in a single mesh keeps cars cheap to draw)
+      wheel: new THREE.CylinderGeometry(0.38, 0.38, 1, 8).rotateZ(Math.PI / 2),
       glass: new THREE.MeshStandardMaterial({ color: '#bfe9ff', roughness: 0.2, flatShading: true }),
       dark: new THREE.MeshStandardMaterial({ color: '#22242a', roughness: 0.8, flatShading: true }),
       smashed: new THREE.MeshStandardMaterial({ color: '#39424a', roughness: 0.9, flatShading: true }),
@@ -122,14 +123,13 @@ class Car {
       this.glass.push(box(G.glass, wid - 0.4, 0.8, 0.1, 0, h - 0.9, len / 2));
     } else {
       box(paint, wid, 0.6, len, 0, 0.65, 0);
-      box(paint, wid - 0.2, 0.5, len * 0.5, 0, 1.1, -0.2);
-      this.glass.push(box(G.glass, wid - 0.16, 0.36, len * 0.5 + 0.06, 0, 1.1, -0.2));
-      this.glass.push(box(G.glass, wid - 0.4, 0.4, len * 0.5 + 0.14, 0, 1.08, -0.2));
+      this.glass.push(box(G.glass, wid - 0.2, 0.5, len * 0.5, 0, 1.1, -0.2));
     }
     const wz = len / 2 - 0.9;
-    for (const x of [1, -1]) for (const z of [1, -1]) {
+    for (const z of [1, -1]) {
       const w = new THREE.Mesh(G.wheel, G.dark);
-      w.position.set(x * (wid / 2 - 0.1), 0.38, z * wz);
+      w.scale.x = wid + 0.1;
+      w.position.set(0, 0.38, z * wz);
       g.add(w);
     }
     g.position.set(this.x, 0, this.z);

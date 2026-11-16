@@ -205,7 +205,7 @@ ui.init({
   },
   onHome: goHome,
   onAgain() { audio.tap(); placeTruck(); },
-  onReset() { audio.tap(); game.world.resetCars(); },
+  onReset() { audio.tap(); game.world.resetCars(); if (game.mode.reset) game.mode.reset(); },
   onMute() { audio.setMuted(!audio.muted); ui.setMuted(audio.muted); },
 });
 ui.setMuted(audio.muted);

@@ -2,7 +2,7 @@
 // Online it always fetches the newest files (and refreshes the saved copy);
 // offline it falls back to the saved copy.
 // If you add new files to the game, add them to FILES and bump VERSION.
-const VERSION = 'monster-rally-v4';
+const VERSION = 'monster-rally-v5';
 const FILES = [
   './',
   './index.html',
@@ -42,7 +42,8 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request)
+    // 'no-cache' = always check with the server, so updates show up straight away
+    fetch(e.request.url, { cache: 'no-cache' })
       .then((res) => {
         if (res.ok) {
           const copy = res.clone();
