@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Monster Rally</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#4fb4ff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Monster Rally">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- shared picture pieces -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="tk-side" viewBox="0 0 44 30">
+        <rect x="5" y="7" width="34" height="10" rx="2"/><rect x="11" y="0" width="16" height="9" rx="2"/>
+        <circle cx="11" cy="21" r="8.5"/><circle cx="33" cy="21" r="8.5"/>
+      </symbol>
+      <symbol id="tk-front" viewBox="0 0 44 30">
+        <rect x="9" y="1" width="26" height="16" rx="3"/>
+        <rect x="0" y="11" width="11" height="19" rx="3"/><rect x="33" y="11" width="11" height="19" rx="3"/>
+      </symbol>
+      <symbol id="arc" viewBox="0 0 64 64">
+        <path d="M32 4 A28 28 0 1 1 4 32" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+        <path d="M4 16 L-7 34 L15 34 Z" fill="currentColor"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ===================== truck + mode selection ===================== -->
+  <div id="select" class="screen">
+    <div class="title">Monster Rally</div>
+    <div id="truck-row"></div>
+    <div id="mode-row" class="hidden">
+      <button class="mode-btn" data-mode="mega" aria-label="Mega Ramp">
+        <svg viewBox="0 0 120 70" preserveAspectRatio="xMidYMid slice">
+          <rect width="120" height="70" fill="#8fd3ff"/>
+          <circle cx="50" cy="13" r="8" fill="#ffe14d"/>
+          <rect y="60" width="120" height="10" fill="#7a4e2b"/>
+          <path d="M0 70 L0 8 L14 8 C30 12 38 58 64 60 C76 60 84 55 90 46 L90 70 Z" fill="#ffb22e" stroke="#c97a10" stroke-width="2"/>
+          <g transform="translate(82 24) rotate(-28)" fill="#e23b3b"><use href="#tk-side" width="34" height="23"/></g>
+          <path d="M66 50 q8 -12 16 -16" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 5"/>
+        </svg>
+        <span>Mega Ramp</span>
+      </button>
+      <button class="mode-btn" data-mode="arena" aria-label="Free Play Arena">
+        <svg viewBox="0 0 120 70" preserveAspectRatio="xMidYMid slice">
+          <rect width="120" height="70" fill="#6d83a6"/>
+          <g fill="#ffd23c"><circle cx="10" cy="7" r="3"/><circle cx="34" cy="5" r="3"/><circle cx="60" cy="6" r="3"/><circle cx="86" cy="5" r="3"/><circle cx="110" cy="7" r="3"/></g>
+          <g fill="#ff5a5a"><circle cx="22" cy="6" r="3"/><circle cx="47" cy="7" r="3"/><circle cx="73" cy="5" r="3"/><circle cx="98" cy="6" r="3"/></g>
+          <rect y="12" width="120" height="6" fill="#f4f1e6"/><rect y="12" width="120" height="2.5" fill="#e8412f"/>
+          <rect y="18" width="120" height="52" fill="#7a4e2b"/>
+          <path d="M8 62 L30 62 L30 46 Q20 56 8 62 Z" fill="#b5793f"/>
+          <g transform="translate(20 28) rotate(-20)" fill="#1e7fe0"><use href="#tk-side" width="30" height="20"/></g>
+          <g>
+            <rect x="52" y="53" width="15" height="7" rx="2" fill="#49c463"/><rect x="70" y="53" width="15" height="7" rx="2" fill="#f2c230"/>
+            <rect x="88" y="53" width="15" height="7" rx="2" fill="#e23b3b"/>
+            <rect x="55" y="49" width="9" height="5" rx="1.5" fill="#bfe9ff"/><rect x="73" y="49" width="9" height="5" rx="1.5" fill="#bfe9ff"/>
+            <rect x="91" y="49" width="9" height="5" rx="1.5" fill="#bfe9ff"/>
+          </g>
+        </svg>
+        <span>Free Play</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================ driving HUD ============================ -->
+  <div id="hud" class="hidden">
+    <div class="top-left">
+      <button id="btn-home" class="round" aria-label="Change truck">
+        <svg viewBox="0 0 64 64"><path d="M32 8 L6 32 H14 V56 H27 V40 H37 V56 H50 V32 H58 Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div class="top-mid">
+      <button id="btn-again" class="pill" aria-label="Again">
+        <svg viewBox="0 0 64 64"><use href="#arc"/></svg><span>Again!</span>
+      </button>
+      <button id="btn-reset" class="pill" aria-label="Reset arena">
+        <svg viewBox="0 0 64 64"><use href="#arc"/>
+          <rect x="18" y="30" width="28" height="10" rx="3" fill="currentColor"/><rect x="24" y="23" width="16" height="9" rx="3" fill="currentColor"/></svg>
+        <span>Reset</span>
+      </button>
+    </div>
+
+    <div class="steer">
+      <button class="ctl steer-btn" data-hold="left" aria-label="Steer left">
+        <svg viewBox="0 0 64 64"><path d="M44 8 L12 32 L44 56 Z" fill="currentColor" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="ctl steer-btn" data-hold="right" aria-label="Steer right">
+        <svg viewBox="0 0 64 64"><path d="M20 8 L52 32 L20 56 Z" fill="currentColor" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="right">
+      <div class="tricks">
+        <button class="ctl trick t-back" data-trick="backflip" aria-label="Backflip">
+          <svg viewBox="0 0 64 64"><g transform="translate(64 0) scale(-1 1)"><use href="#arc"/></g>
+            <g transform="rotate(-25 32 34)"><use href="#tk-side" x="13" y="21" width="38" height="26" fill="#1d2b4f"/></g></svg>
+          <kbd>J</kbd>
+        </button>
+        <button class="ctl trick t-front" data-trick="frontflip" aria-label="Front flip">
+          <svg viewBox="0 0 64 64"><use href="#arc"/>
+            <g transform="rotate(25 32 34)"><use href="#tk-side" x="13" y="21" width="38" height="26" fill="#1d2b4f"/></g></svg>
+          <kbd>K</kbd>
+        </button>
+        <button class="ctl trick t-spin" data-trick="spin" aria-label="Spin">
+          <svg viewBox="0 0 64 64">
+            <use href="#tk-side" x="13" y="2" width="38" height="26" fill="#1d2b4f"/>
+            <path d="M12 38 A22 9 0 1 0 54 40" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+            <path d="M56 26 L46 42 L64 44 Z" fill="currentColor"/></svg>
+          <kbd>L</kbd>
+        </button>
+        <button class="ctl trick t-cart" data-trick="cartwheel" aria-label="Cartwheel">
+          <svg viewBox="0 0 64 64"><use href="#arc"/>
+            <g transform="rotate(30 32 34)"><use href="#tk-front" x="13" y="21" width="38" height="26" fill="#1d2b4f"/></g></svg>
+          <kbd>I</kbd>
+        </button>
+      </div>
+      <div class="pedals">
+        <button class="ctl pedal brake" data-hold="brake" aria-label="Brake and reverse">
+          <svg viewBox="0 0 64 64"><path d="M10 14 L32 34 L54 14 M10 32 L32 52 L54 32" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="ctl pedal gas" data-hold="gas" aria-label="Gas">
+          <svg viewBox="0 0 64 64"><path d="M10 50 L32 30 L54 50 M10 32 L32 12 L54 32" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>GO</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button id="btn-mute" class="round" aria-label="Sound on or off">
+    <svg viewBox="0 0 64 64">
+      <path d="M8 24 H20 L36 10 V54 L20 40 H8 Z" fill="currentColor"/>
+      <g class="waves" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round">
+        <path d="M44 22 Q52 32 44 42"/><path d="M50 14 Q64 32 50 50"/></g>
+      <path class="cross" d="M43 22 L59 42 M59 22 L43 42" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <div id="pop"></div>
+
+  <div id="rotate">
+    <svg viewBox="0 0 120 120">
+      <rect x="40" y="14" width="40" height="70" rx="7" fill="none" stroke="#fff" stroke-width="6" opacity=".45"/>
+      <rect x="20" y="62" width="80" height="44" rx="7" fill="#ffd23c" stroke="#fff" stroke-width="6"/>
+      <path d="M92 20 Q110 30 106 52" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+      <path d="M96 50 L107 60 L114 46 Z" fill="#fff"/>
+    </svg>
+    <div>Turn me sideways!</div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
