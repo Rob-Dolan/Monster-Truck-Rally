@@ -1,5 +1,6 @@
 // Mode 1: Mega Ramp - roll off a giant ramp, fly, do tricks, land in the mud.
-import { World, profiles } from '../world.js';
+import { World } from '../world.js';
+import { CarPyramid } from '../pyramid.js';
 
 const EAST = Math.PI / 2;
 const smooth = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
@@ -31,8 +32,10 @@ export function buildMegaRamp() {
   w.addGround(END - X0 + 60, HALF * 2 + 12, (END + X0) / 2, 0);
 
   const ramp = w.addRamp({ x: X0, z: 0, yaw: EAST, len: LEN, wid: WID, profile: megaProfile, color: '#ffb22e' });
-  // landing hill: steep front, flat top, very long gentle downslope
-  w.addRamp({ x: 250, z: 0, yaw: EAST, len: 230, wid: 70, margin: 5, profile: profiles.tabletop(230, 20, 30, 160), color: '#8f6238' });
+  // a giant pyramid of cars right where the jump comes down: the truck
+  // smashes through the top of it in mid-air
+  const pyramid = new CarPyramid({ x: 394, z: 0, layers: 14 });
+  w.group.add(pyramid.group);
 
   // stacked cars to land on and crush
   const pile = (x, z) => {
@@ -61,6 +64,9 @@ export function buildMegaRamp() {
   return {
     world: w,
     fog: [500, 2200],
+    // per-frame extras: returns cars smashed out of the pyramid this frame
+    frame(dt, truck) { return pyramid.update(dt, truck); },
+    reset() { pyramid.reset(); },
     start: { x: X0 + 8, y: H, z: 0, yaw: EAST },
     // keep the truck from sliding off the side of the ramp
     update(truck) {

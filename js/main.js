@@ -28,6 +28,7 @@ let screen = 'select';
 let truckIndex = -1;
 let game = null;          // everything for the current play session
 let celebrateCooldown = 0;
+let smashCooldown = 0;
 const portrait = window.matchMedia('(orientation: portrait) and (pointer: coarse)');
 
 // ------------------------------------------------------------- set up ----
@@ -67,6 +68,8 @@ function placeTruck() {
   const { mode, truck, world, particles } = game;
   const s = mode.start;
   world.resetCars();
+  if (mode.reset) mode.reset();
+  smashCooldown = 0;
   truck.reset(s.x, s.y, s.z, s.yaw);
   truck.syncVisual(1);
   followCam.update(0, truck, world, true);
@@ -111,6 +114,16 @@ function updateGame(dt) {
     for (const car of crushed) particles.glassBurst(car.x, car.base + car.curH, car.z, car.color);
     audio.crunch();
     truck.kick(3.5);
+  }
+
+  // mode extras (the mega ramp's car pyramid)
+  smashCooldown -= dt;
+  const smashed = mode.frame ? mode.frame(dt, truck) : null;
+  if (smashed) {
+    for (const car of smashed.points) particles.glassBurst(car.x, car.y, car.z, car.color);
+    if (smashCooldown <= 0) { audio.crunch(); smashCooldown = 0.09; }
+    truck.kick(2.5);
+    if (smashed.first) celebrate();
   }
 
   for (const ev of truck.events) {
